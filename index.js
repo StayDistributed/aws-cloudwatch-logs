@@ -3,16 +3,17 @@ module.exports = function (config) {
   var cloudwatchlogs = config.cloudwatchlogs,
       logGroupName = config.logGroupName || '/aws-cloudwatch-logs/default';
 
-  function log (eventName, message) {
+  function log (eventName, message, done) {
 
-    var d = new Date(),
+    var logCallback = done || function () {}
+        d = new Date(),
         logStreamName = config.logStreamName || ([d.getFullYear(), d.getMonth()+1, d.getDate()].join('/') + ' ' + eventName);
 
     cloudwatchlogs.describeLogStreams({
       logGroupName: logGroupName,
       logStreamNamePrefix: logStreamName
     }, function (err, data) {
-      if (err || !data) return;
+      if (err || !data) return logCallback(err);
 
       if (data.logStreams && data.logStreams[0]) {
 
@@ -24,7 +25,7 @@ module.exports = function (config) {
           logGroupName: logGroupName,
           logStreamName: logStreamName,
           sequenceToken: data.logStreams[0].uploadSequenceToken
-        }, function (err, data) {});
+        }, logCallback);
 
       } else {
 
@@ -32,7 +33,7 @@ module.exports = function (config) {
           logGroupName: logGroupName,
           logStreamName: logStreamName
         }, function (err, data) {
-          if (err) return;
+          if (err) return logCallback(err);
 
           cloudwatchlogs.putLogEvents({
             logEvents: [{
@@ -41,7 +42,7 @@ module.exports = function (config) {
             }],
             logGroupName: logGroupName,
             logStreamName: logStreamName
-          }, function (err, data) {});
+          }, logCallback);
         });
 
       }
