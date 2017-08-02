@@ -3,37 +3,21 @@ module.exports = function (config) {
   var cloudwatchlogs = config.cloudwatchlogs,
       logGroupName = config.logGroupName || '/aws-cloudwatch-logs/default';
 
-  function log (eventName, message, done) {
+  return {
 
-    var logCallback = done || function () {}
-        d = new Date(),
-        logStreamName = config.logStreamName || ([d.getFullYear(), d.getMonth()+1, d.getDate()].join('/') + ' ' + eventName);
+    log: function (eventName, message, done) {
 
-    cloudwatchlogs.describeLogStreams({
-      logGroupName: logGroupName,
-      logStreamNamePrefix: logStreamName
-    }, function (err, data) {
-      if (err || !data) return logCallback(err);
+      var logCallback = done || function () {}
+          d = new Date(),
+          logStreamName = config.logStreamName || ([d.getFullYear(), d.getMonth()+1, d.getDate()].join('/') + ' ' + eventName);
 
-      if (data.logStreams && data.logStreams[0]) {
+      cloudwatchlogs.describeLogStreams({
+        logGroupName: logGroupName,
+        logStreamNamePrefix: logStreamName
+      }, function (err, data) {
+        if (err || !data) return logCallback(err);
 
-        cloudwatchlogs.putLogEvents({
-          logEvents: [{
-            message: JSON.stringify(message),
-            timestamp: (new Date).getTime()
-          }],
-          logGroupName: logGroupName,
-          logStreamName: logStreamName,
-          sequenceToken: data.logStreams[0].uploadSequenceToken
-        }, logCallback);
-
-      } else {
-
-        cloudwatchlogs.createLogStream({
-          logGroupName: logGroupName,
-          logStreamName: logStreamName
-        }, function (err, data) {
-          if (err) return logCallback(err);
+        if (data.logStreams && data.logStreams[0]) {
 
           cloudwatchlogs.putLogEvents({
             logEvents: [{
@@ -41,14 +25,33 @@ module.exports = function (config) {
               timestamp: (new Date).getTime()
             }],
             logGroupName: logGroupName,
-            logStreamName: logStreamName
+            logStreamName: logStreamName,
+            sequenceToken: data.logStreams[0].uploadSequenceToken
           }, logCallback);
-        });
 
-      }
+        } else {
 
-    });
+          cloudwatchlogs.createLogStream({
+            logGroupName: logGroupName,
+            logStreamName: logStreamName
+          }, function (err, data) {
+            if (err) return logCallback(err);
 
+            cloudwatchlogs.putLogEvents({
+              logEvents: [{
+                message: JSON.stringify(message),
+                timestamp: (new Date).getTime()
+              }],
+              logGroupName: logGroupName,
+              logStreamName: logStreamName
+            }, logCallback);
+          });
+
+        }
+
+      });
+
+    }
   }
 
 };
