@@ -1,0 +1,24 @@
+{
+  "name": "aws-cloudwatch-logs",
+  "version": "1.0.0",
+  "description": "Put logs into cloudwatch in one line, automatically check uploadSequenceToken",
+  "main": "index.js",
+  "scripts": {
+    "test": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/StayDistributed/aws-cloudwatch-logs.git"
+  },
+  "keywords": [
+    "aws",
+    "cloudwatch",
+    "logs"
+  ],
+  "author": "Michele Salvini",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/StayDistributed/aws-cloudwatch-logs/issues"
+  },
+  "homepage": "https://github.com/StayDistributed/aws-cloudwatch-logs#readme"
+}
