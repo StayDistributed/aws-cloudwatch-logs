@@ -7,7 +7,7 @@ module.exports = function (config) {
 
     log: function (eventName, message, done) {
 
-      var logCallback = done || function () {}
+      var logCallback = done || function () {},
           d = new Date(),
           logStreamName = config.logStreamName || ([d.getFullYear(), d.getMonth()+1, d.getDate()].join('/') + ' ' + eventName);
 
